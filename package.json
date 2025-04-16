@@ -1,0 +1,39 @@
+{
+  "name": "edu-bangladesh-homework-help",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3",
+    "@supabase/supabase-js": "^2.49.4",
+    "autoprefixer": "^10.4.16",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
+    "katex": "^0.16.22",
+    "mathjax": "^3.2.2",
+    "next": "^14.0.4",
+    "next-themes": "^0.2.1",
+    "postcss": "^8.4.32",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
+    "react-markdown": "^9.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3",
+    "zustand": "^4.5.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.0.4"
+  }
+}

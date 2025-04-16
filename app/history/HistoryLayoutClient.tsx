@@ -1,19 +1,40 @@
 'use client'
 
 import Link from 'next/link'
-import { FiBook, FiHome, FiClock, FiMoon, FiSun } from 'react-icons/fi'
+import { FiBook, FiHome, FiClock, FiMoon, FiSun, FiUser, FiLogOut } from 'react-icons/fi'
 import { useTheme } from 'next-themes'
 import { useAppStore } from '@/app/store/store'
+import { useAuth } from '@/app/auth/AuthContext'
+import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function HistoryLayoutClient({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useAppStore();
   const { setTheme } = useTheme();
+  const { user, signOut, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/auth/login');
+    }
+  }, [user, isLoading, router]);
 
   // Sync the theme state with next-themes when it changes in the store
   useEffect(() => {
     setTheme(theme);
   }, [theme, setTheme]);
+
+  // If loading auth state, show minimal UI
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  // If no user, don't render anything (redirect happens via useEffect)
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen">
@@ -83,6 +104,22 @@ export default function HistoryLayoutClient({ children }: { children: React.Reac
             <Link href="/" className="flex items-center px-3 py-2 mt-1 text-gray-400 hover:text-white">
               <FiHome className="mr-2" /> Back to Home
             </Link>
+          </div>
+          
+          {/* User Profile Section */}
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="flex items-center px-3 py-2 text-white">
+              <FiUser className="mr-2" /> 
+              <div className="overflow-hidden text-sm">
+                <div className="truncate">{user?.email}</div>
+              </div>
+            </div>
+            <button 
+              onClick={() => signOut()}
+              className="w-full flex items-center px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded mt-1"
+            >
+              <FiLogOut className="mr-2" /> Sign Out
+            </button>
           </div>
         </nav>
       </aside>

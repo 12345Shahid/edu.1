@@ -5,6 +5,62 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUz
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Authentication functions
+export async function signUpWithEmail(email: string, password: string) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+}
+
+export async function resetPassword(email: string) {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function updatePassword(password: string) {
+  const { data, error } = await supabase.auth.updateUser({
+    password,
+  });
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function getCurrentUser() {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error) throw error;
+  return user;
+}
+
+export async function getSession() {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return session;
+}
+
 // Types for our database tables
 export interface ChatHistory {
   id: string;
@@ -57,9 +113,13 @@ export interface UserPreferences {
 
 // Chat history functions
 export async function createChat(category: string, title: string = 'New Chat') {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('chat_history')
-    .insert([{ category, title }])
+    .insert([{ category, title, user_id: user.id }])
     .select()
     .single();
   
@@ -68,9 +128,14 @@ export async function createChat(category: string, title: string = 'New Chat') {
 }
 
 export async function getChatHistory() {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('chat_history')
     .select('*')
+    .eq('user_id', user.id)
     .order('updated_at', { ascending: false });
   
   if (error) throw error;
@@ -132,9 +197,13 @@ export async function deleteChat(chatId: string) {
 
 // Notes functions
 export async function createFolder(name: string, parentId?: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('note_folders')
-    .insert([{ name, parent_id: parentId }])
+    .insert([{ name, parent_id: parentId, user_id: user.id }])
     .select()
     .single();
   
@@ -143,9 +212,14 @@ export async function createFolder(name: string, parentId?: string) {
 }
 
 export async function getFolders() {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('note_folders')
     .select('*')
+    .eq('user_id', user.id)
     .order('name', { ascending: true });
   
   if (error) throw error;
@@ -153,9 +227,13 @@ export async function getFolders() {
 }
 
 export async function createNote(title: string, content: string, folderId?: string, tags: string[] = []) {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('notes')
-    .insert([{ title, content, folder_id: folderId, tags }])
+    .insert([{ title, content, folder_id: folderId, tags, user_id: user.id }])
     .select()
     .single();
   
@@ -164,9 +242,14 @@ export async function createNote(title: string, content: string, folderId?: stri
 }
 
 export async function getNotes(folderId?: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   let query = supabase
     .from('notes')
     .select('*')
+    .eq('user_id', user.id)
     .order('updated_at', { ascending: false });
   
   if (folderId) {
@@ -217,10 +300,14 @@ export async function deleteNote(noteId: string) {
 
 // User preferences functions
 export async function getUserPreferences() {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('user_preferences')
     .select('*')
-    .eq('user_id', 'anonymous')
+    .eq('user_id', user.id)
     .single();
   
   if (error && error.code !== 'PGRST116') { // PGRST116 is "row not found"
@@ -241,10 +328,14 @@ export async function createUserPreferences(
   readingLevel: string = 'standard',
   showStepByStep: boolean = true
 ) {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('user_preferences')
     .insert([{
-      user_id: 'anonymous',
+      user_id: user.id,
       theme,
       language,
       reading_level: readingLevel,
@@ -258,10 +349,14 @@ export async function createUserPreferences(
 }
 
 export async function updateUserPreferences(updates: Partial<UserPreferences>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error('User not authenticated');
+  
   const { data, error } = await supabase
     .from('user_preferences')
     .update(updates)
-    .eq('user_id', 'anonymous')
+    .eq('user_id', user.id)
     .select()
     .single();
   

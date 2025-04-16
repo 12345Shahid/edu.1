@@ -1,7 +1,13 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAuth } from '@/app/auth/AuthContext'
+import { FiUser, FiLogIn } from 'react-icons/fi'
 
 export default function Home() {
+  const { user, isLoading } = useAuth();
+  
   const categories = [
     { name: 'Below SSC', path: '/chat/below-ssc', description: 'For students below Secondary School Certificate level' },
     { name: 'SSC', path: '/chat/ssc', description: 'For Secondary School Certificate students' },
@@ -18,6 +24,32 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center">
       <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-primary to-secondary">
         <div className="container px-4 md:px-6 mx-auto">
+          <div className="flex justify-end mb-4">
+            {!isLoading && (
+              user ? (
+                <div className="bg-white/20 rounded-full px-4 py-2 text-white flex items-center space-x-2">
+                  <FiUser />
+                  <span>{user.email}</span>
+                </div>
+              ) : (
+                <div className="flex space-x-2">
+                  <Link 
+                    href="/auth/login" 
+                    className="bg-white text-primary rounded-full px-4 py-2 flex items-center space-x-1 hover:bg-gray-100"
+                  >
+                    <FiLogIn />
+                    <span>Log in</span>
+                  </Link>
+                  <Link 
+                    href="/auth/register" 
+                    className="bg-primary-dark text-white rounded-full px-4 py-2 hover:bg-primary-darker"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )
+            )}
+          </div>
           <div className="flex flex-col items-center space-y-4 text-center">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-white">
               EduHalal Bangladesh
@@ -25,6 +57,22 @@ export default function Home() {
             <p className="max-w-[700px] text-white md:text-xl">
               Your AI-powered homework assistant for students in Bangladesh
             </p>
+            {!isLoading && !user && (
+              <Link 
+                href="/auth/register" 
+                className="mt-4 bg-white text-primary hover:bg-gray-100 rounded-md px-6 py-3 font-medium"
+              >
+                Get Started - It's Free
+              </Link>
+            )}
+            {!isLoading && user && (
+              <Link 
+                href="/chat/below-ssc" 
+                className="mt-4 bg-white text-primary hover:bg-gray-100 rounded-md px-6 py-3 font-medium"
+              >
+                Start Chatting
+              </Link>
+            )}
           </div>
         </div>
       </section>

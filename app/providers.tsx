@@ -3,6 +3,7 @@
 import { ThemeProvider } from 'next-themes';
 import { useEffect } from 'react';
 import { useAppStore } from '@/app/store/store';
+import { AuthProvider } from '@/app/auth/AuthContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const { theme, initFromDatabase } = useAppStore();
@@ -23,8 +24,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme={theme} enableSystem={false}>
-      {children}
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider attribute="class" defaultTheme={theme} enableSystem={false}>
+        {children}
+      </ThemeProvider>
+    </AuthProvider>
   );
 } 

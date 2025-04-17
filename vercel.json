@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "VERCEL=1 NODE_OPTIONS='--max-old-space-size=3072' next build",
   "installCommand": "npm install",
   "devCommand": "next dev",
   "framework": "nextjs",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "debug": true
 } 
